@@ -1,0 +1,214 @@
+@page {
+  size: A4;
+  margin: 16mm 16mm 18mm;
+}
+@page :first {
+  margin: 0;
+}
+
+.pg {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  background: #fbfaff;
+  color: #2a2350;
+  font-family: var(--font-body-latin), var(--font-si-sans), var(--font-ta-sans), sans-serif;
+}
+
+.pg-cover {
+  position: relative;
+  height: 297mm;
+  width: 210mm;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 60mm;
+  text-align: center;
+  break-after: page;
+  background:
+    radial-gradient(70mm 70mm at 75% 25%, rgb(139 108 255 / 0.35), transparent 70%),
+    radial-gradient(80mm 80mm at 15% 70%, rgb(103 232 249 / 0.18), transparent 70%),
+    #0b0820;
+  color: #fff;
+}
+.pg-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+    radial-gradient(1px 1px at 120px 80px, #ffffffcc, transparent),
+    radial-gradient(1.5px 1.5px at 60px 150px, #fff, transparent),
+    radial-gradient(1px 1px at 170px 120px, #ffffff99, transparent),
+    radial-gradient(1px 1px at 90px 200px, #fff, transparent);
+  background-size: 200px 220px;
+}
+.pg-planet-wrap {
+  position: absolute;
+  top: 60mm;
+  left: 50%;
+  width: 60mm;
+  height: 60mm;
+  transform: translateX(-50%);
+}
+.pg-planet {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  z-index: 2;
+  background: radial-gradient(circle at 32% 28%, #f3eaff 0%, #b9a2ff 14%, #7c5cff 40%, #3b1f9e 70%, #120a3a 100%);
+  box-shadow: 0 0 25mm 4mm rgb(139 108 255 / 0.5), 0 0 50mm 12mm rgb(245 200 107 / 0.15);
+}
+.pg-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 110mm;
+  height: 20mm;
+  border-radius: 50%;
+  border: 0.6mm solid #f5c86b;
+  transform: translate(-50%, -50%) rotate(-8deg);
+}
+.pg-ring-back {
+  z-index: 1;
+}
+.pg-ring-front {
+  z-index: 3;
+  clip-path: inset(50% 0 0 0);
+}
+.pg-brand {
+  position: relative;
+  letter-spacing: 0.4em;
+  font-size: 9pt;
+  color: #f5c86b;
+}
+.pg-title {
+  position: relative;
+  margin-top: 6mm;
+  font-family: var(--font-display-latin), var(--font-si-serif), var(--font-ta-serif), serif;
+  font-size: 34pt;
+  font-weight: 700;
+  line-height: 1.25;
+  padding: 0 18mm;
+}
+.pg-sub {
+  position: relative;
+  margin-top: 4mm;
+  font-size: 11.5pt;
+  color: #d8d3ff;
+  padding: 0 24mm;
+  line-height: 1.6;
+}
+.pg-rule {
+  position: relative;
+  margin-top: 6mm;
+  width: 24mm;
+  height: 0.4mm;
+  background: #f5c86b;
+}
+
+.pg-body {
+  font-size: 10.5pt;
+  line-height: 1.65;
+}
+.pg-section {
+  margin-bottom: 8mm;
+}
+.pg-break {
+  break-before: page;
+}
+.pg-eyebrow {
+  font-size: 8.5pt;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #b8860b;
+}
+.pg-h1 {
+  font-family: var(--font-display-latin), var(--font-si-serif), var(--font-ta-serif), serif;
+  font-size: 22pt;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 1mm 0 2mm;
+}
+.pg-lead {
+  color: #5b5680;
+  margin-bottom: 5mm;
+}
+.pg-step {
+  display: flex;
+  gap: 5mm;
+  background: #fff;
+  border: 0.3mm solid #e4e0f7;
+  border-left: 1.2mm solid;
+  padding: 3.5mm 4mm;
+  margin-bottom: 3mm;
+  break-inside: avoid;
+}
+.pg-num {
+  font-family: var(--font-display-latin), serif;
+  font-size: 20pt;
+  font-weight: 700;
+  line-height: 1;
+  min-width: 10mm;
+}
+.pg-step h3 {
+  font-weight: 700;
+  font-size: 11.5pt;
+}
+.pg-step p {
+  margin-top: 1mm;
+}
+.pg-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4mm;
+}
+.pg-box {
+  background: #f1eeff;
+  padding: 4mm 5mm;
+  break-inside: avoid;
+}
+.pg-box h3 {
+  font-weight: 700;
+  margin-bottom: 2mm;
+}
+.pg-box li {
+  list-style: none;
+  padding-left: 4mm;
+  position: relative;
+  margin-bottom: 1.5mm;
+}
+.pg-box li::before {
+  content: "•";
+  color: #7c5cff;
+  position: absolute;
+  left: 0;
+}
+.pg-quote {
+  font-family: var(--font-display-latin), var(--font-si-serif), var(--font-ta-serif), serif;
+  font-style: italic;
+  font-size: 13pt;
+  margin: 2mm 0 2mm 3mm;
+}
+[lang="si"] .pg-quote,
+[lang="ta"] .pg-quote {
+  font-style: normal;
+  font-size: 11.5pt;
+}
+.pg-mt {
+  margin-top: 8mm;
+}
+.pg-line {
+  margin-top: 6mm;
+}
+
+@media screen {
+  .pg {
+    max-width: 210mm;
+    margin: 0 auto;
+  }
+  .pg-body {
+    padding: 16mm;
+  }
+}

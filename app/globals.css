@@ -1,26 +1,378 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --night: #07051a;
+  --deep: #120c33;
+  --ink: #ece9ff;
+  --muted: #a9a3d6;
+  --gold: #f5c86b;
+  --violet: #8b6cff;
+  --cyan: #67e8f9;
+  --rose: #f472b6;
+  --glass: rgb(255 255 255 / 0.06);
+  --glass-line: rgb(255 255 255 / 0.12);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-night: var(--night);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-gold: var(--gold);
+  --color-violet: var(--violet);
+  --color-cyan: var(--cyan);
+  --color-rose: var(--rose);
+  --font-sans: var(--font-body-latin), var(--font-si-sans), var(--font-ta-sans), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  background: var(--night);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(1200px 700px at 80% -10%, rgb(139 108 255 / 0.25), transparent 60%),
+    radial-gradient(900px 600px at -10% 40%, rgb(103 232 249 / 0.12), transparent 60%),
+    radial-gradient(900px 700px at 100% 90%, rgb(244 114 182 / 0.12), transparent 60%),
+    var(--night);
+  color: var(--ink);
+  font-family: var(--font-body-latin), var(--font-si-sans), var(--font-ta-sans), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+.font-display {
+  font-family: var(--font-display-latin), var(--font-si-serif), var(--font-ta-serif), Georgia, serif;
+}
+
+.hero-title {
+  font-size: clamp(2.8rem, 6.5vw, 6rem);
+  line-height: 1.04;
+}
+/* Sinhala and Tamil words are longer and taller: smaller sizes, more line height */
+[lang="si"] .hero-title,
+[lang="ta"] .hero-title {
+  font-size: clamp(2.1rem, 4.6vw, 4.2rem);
+  line-height: 1.3;
+}
+[lang="si"] .font-display,
+[lang="ta"] .font-display {
+  line-height: 1.35;
+  font-style: normal;
+}
+[lang="ta"] h2.font-display {
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+}
+[lang="si"] .eyebrow,
+[lang="ta"] .eyebrow {
+  letter-spacing: 0.08em;
+}
+
+/* 3D book */
+.book {
+  transform-style: preserve-3d;
+  transform: rotateY(-28deg) rotateX(8deg);
+  transition: transform 0.7s ease;
+}
+.book:hover {
+  transform: rotateY(-8deg) rotateX(2deg);
+}
+.book-cover {
+  background: radial-gradient(circle at 50% 35%, #8b6cff 0, #2a1570 45%, #0b0820 100%);
+  box-shadow: 20px 30px 60px -10px rgb(0 0 0 / 0.8);
+  transform: translateZ(14px);
+}
+.book-pages {
+  background: linear-gradient(to right, #e9e4ff, #bdb3ef);
+  transform-origin: left;
+  transform: rotateY(90deg);
+}
+
+/* Printing a plan: only the plan sheet, on a dark background */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+  html.print-plan,
+  html.print-plan body {
+    background: #0b0820 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  html.print-plan .no-print,
+  html.print-plan canvas {
+    display: none !important;
+  }
+  html.print-plan #planner {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  html.print-plan .plan-card {
+    break-inside: avoid;
+    backdrop-filter: none !important;
+    background: #17113a !important;
+  }
+  html.print-plan .fade-in {
+    animation: none !important;
+  }
+}
+
+.text-cosmic {
+  background: linear-gradient(100deg, #fff 0%, var(--gold) 35%, var(--rose) 65%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glass {
+  background: linear-gradient(160deg, rgb(255 255 255 / 0.09), rgb(255 255 255 / 0.02));
+  border: 1px solid var(--glass-line);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 20px 60px -20px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.85rem 1.5rem;
+  font-weight: 600;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.btn:hover {
+  transform: translateY(-2px);
+}
+.btn-primary {
+  color: #1b1030;
+  background: linear-gradient(120deg, var(--gold), #ffe3a6);
+  box-shadow: 0 10px 40px -8px rgb(245 200 107 / 0.6);
+}
+.btn-ghost {
+  color: var(--ink);
+  border: 1px solid var(--glass-line);
+  background: var(--glass);
+}
+.btn-ghost:hover {
+  background: rgb(255 255 255 / 0.12);
+}
+
+.field {
+  width: 100%;
+  border-radius: 0.9rem;
+  background: rgb(0 0 0 / 0.3);
+  border: 1px solid var(--glass-line);
+  padding: 0.8rem 1rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field::placeholder {
+  color: rgb(169 163 214 / 0.7);
+}
+.field:focus {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 4px rgb(139 108 255 / 0.25);
+}
+
+/* ---------- 3D planet ---------- */
+.scene {
+  perspective: 1100px;
+}
+.planet-wrap {
+  position: relative;
+  width: var(--size, 340px);
+  height: var(--size, 340px);
+  transform-style: preserve-3d;
+  animation: float 7s ease-in-out infinite;
+}
+.planet {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 28%, #f3eaff 0%, #b9a2ff 14%, #7c5cff 38%, #3b1f9e 68%, #120a3a 100%);
+  box-shadow:
+    0 0 80px 10px rgb(139 108 255 / 0.45),
+    0 0 180px 40px rgb(245 200 107 / 0.12),
+    inset -30px -40px 80px rgb(0 0 0 / 0.55);
+  overflow: hidden;
+}
+.planet::before {
+  /* drifting cloud bands give the sphere a sense of rotation */
+  content: "";
+  position: absolute;
+  inset: -10%;
+  width: 220%;
+  background: repeating-linear-gradient(
+    172deg,
+    transparent 0 18px,
+    rgb(255 255 255 / 0.07) 18px 30px,
+    transparent 30px 52px,
+    rgb(103 232 249 / 0.07) 52px 60px
+  );
+  border-radius: 50%;
+  animation: spin-bands 22s linear infinite;
+}
+.planet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 70% 75%, transparent 40%, rgb(4 2 18 / 0.75) 85%);
+}
+.ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  transform-style: preserve-3d;
+  transform: translate(-50%, -50%) rotateX(74deg) rotateY(-12deg);
+}
+.ring-a {
+  width: 170%;
+  height: 170%;
+  border: 2px solid rgb(245 200 107 / 0.8);
+  box-shadow: 0 0 30px rgb(245 200 107 / 0.5), inset 0 0 30px rgb(245 200 107 / 0.35);
+  animation: ring-spin 18s linear infinite;
+}
+.ring-b {
+  width: 215%;
+  height: 215%;
+  border: 1px dashed rgb(103 232 249 / 0.55);
+  animation: ring-spin 30s linear infinite reverse;
+}
+.moon {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, var(--cyan));
+  box-shadow: 0 0 18px var(--cyan);
+  transform: rotateX(-74deg);
+}
+@keyframes ring-spin {
+  to {
+    transform: translate(-50%, -50%) rotateX(74deg) rotateY(-12deg) rotateZ(360deg);
+  }
+}
+@keyframes spin-bands {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotateZ(-4deg); }
+  50% { transform: translateY(-18px) rotateZ(2deg); }
+}
+
+/* ---------- 3D tilt cards ---------- */
+.tilt {
+  transform-style: preserve-3d;
+  transition: transform 0.25s ease-out;
+  will-change: transform;
+}
+.tilt .pop {
+  transform: translateZ(40px);
+}
+.tilt .pop-sm {
+  transform: translateZ(22px);
+}
+.tilt-glare {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgb(255 255 255 / 0.16), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.tilt:hover .tilt-glare {
+  opacity: 1;
+}
+
+/* 3D number badges */
+.orb-num {
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  font-weight: 700;
+  color: #120a3a;
+  background: radial-gradient(circle at 30% 25%, #fff 0%, var(--c, var(--gold)) 45%, rgb(0 0 0 / 0.35) 120%);
+  box-shadow: 0 10px 25px -5px var(--c, var(--gold)), inset -4px -6px 10px rgb(0 0 0 / 0.25);
+}
+
+/* rotating 3D cube used in the motivation section */
+.cube {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  transform-style: preserve-3d;
+  animation: cube-spin 16s linear infinite;
+}
+.cube > div {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 2.6rem;
+  border: 1px solid rgb(255 255 255 / 0.25);
+  background: linear-gradient(135deg, rgb(139 108 255 / 0.35), rgb(103 232 249 / 0.15));
+  box-shadow: inset 0 0 30px rgb(255 255 255 / 0.12);
+  backface-visibility: visible;
+}
+.cube > div:nth-child(1) { transform: translateZ(60px); }
+.cube > div:nth-child(2) { transform: rotateY(180deg) translateZ(60px); }
+.cube > div:nth-child(3) { transform: rotateY(90deg) translateZ(60px); }
+.cube > div:nth-child(4) { transform: rotateY(-90deg) translateZ(60px); }
+.cube > div:nth-child(5) { transform: rotateX(90deg) translateZ(60px); }
+.cube > div:nth-child(6) { transform: rotateX(-90deg) translateZ(60px); }
+@keyframes cube-spin {
+  from { transform: rotateX(-20deg) rotateY(0deg); }
+  to { transform: rotateX(-20deg) rotateY(360deg); }
+}
+
+/* progress ring */
+.progress-ring circle {
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+/* reveal on scroll */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px) rotateX(12deg);
+  transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+.fade-in {
+  animation: fade-in 0.6s ease both;
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .reveal { opacity: 1; transform: none; }
 }
