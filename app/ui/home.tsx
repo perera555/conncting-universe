@@ -124,7 +124,7 @@ export default function Home({ lang }: { lang: Lang }) {
           <div className="no-print">
             <SectionHead eyebrow={t.planner.eyebrow} title={t.planner.title} lead={t.planner.lead} />
           </div>
-          <Planner t={t.planner} locale={LANG_LOCALE[lang]} />
+          <Planner t={t.planner} locale={LANG_LOCALE[lang]} lang={lang} />
         </section>
 
         {/* My goals */}

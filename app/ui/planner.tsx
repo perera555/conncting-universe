@@ -8,6 +8,10 @@ import {
   DEFAULT_PERIOD, PHASE_MONEY, PHASE_SHARES, type CategoryKey, type Money, type Unit,
 } from "@/content/plan";
 import { useStored, uid } from "./use-stored";
+import { LangSwitch } from "./language";
+import TranslitInput from "./translit-input";
+import type { TypingLang } from "@/content/translit";
+import type { Lang } from "@/content/i18n";
 import type { Goal } from "./goal-studio";
 
 type T = Dict["planner"];
@@ -29,9 +33,28 @@ type Plan = {
 
 const UNITS: Unit[] = ["days", "weeks", "months", "years"];
 
-function Card({ title, icon, children, className = "" }: { title: string; icon: string; children: ReactNode; className?: string }) {
+/** One numbered step of the form, joined to the next by a vertical line. */
+function Step({ n, title, htmlFor, last, children }: { n: number; title: string; htmlFor?: string; last?: boolean; children: ReactNode }) {
+  const Title = htmlFor ? "label" : "p";
+  return (
+    <div className={`relative pl-14 md:pl-16 ${last ? "" : "pb-9"}`}>
+      {!last && <span aria-hidden className="absolute top-12 bottom-1 left-[1.35rem] w-px bg-gradient-to-b from-gold/60 via-violet/40 to-transparent" />}
+      <span aria-hidden className="orb-num font-display absolute top-0 left-0 h-11! w-11! text-lg" style={{ ["--c" as string]: last ? "#f5c86b" : "#8b6cff" }}>
+        {n}
+      </span>
+      <Title {...(htmlFor ? { htmlFor } : {})} className="block pt-2 text-lg font-semibold">
+        {title}
+      </Title>
+      {children}
+    </div>
+  );
+}
+
+type CardProps = { title: string; icon: string; children: ReactNode; className?: string; guide?: string };
+function Card({ title, icon, children, className = "", guide }: CardProps) {
   return (
     <section className={`glass plan-card rounded-3xl p-6 ${className}`}>
+      {guide && <span className="guide-pill">{guide}</span>}
       <h3 className="font-display flex items-center gap-3 text-2xl">
         {icon && <span className="text-xl">{icon}</span>}
         {title}
@@ -54,13 +77,15 @@ function Stars({ items }: { items: string[] }) {
   );
 }
 
-export default function Planner({ t, locale }: { t: T; locale: string }) {
-  const [goal, setGoal] = useState("");
-  const [feeling, setFeeling] = useState("");
+export default function Planner({ t, locale, lang }: { t: T; locale: string; lang: Lang }) {
+  // Drafts are remembered so switching the language keeps what you typed.
+  const [goal, setGoal] = useStored("cu-draft-goal", "");
+  const [feeling, setFeeling] = useStored("cu-draft-feeling", "");
   const [n, setN] = useState("");
   const [unit, setUnit] = useState<Unit>("years");
   const [endDate, setEndDate] = useState("");
   const [urgent, setUrgent] = useState(false);
+  const [typing, setTyping] = useState<TypingLang>(lang);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [saved, setSaved] = useState(false);
   const [, setGoals] = useStored<Goal[]>("cu-goals", []);
@@ -164,6 +189,11 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
     });
     const m = plan.money;
     const perDay = m ? m.amount / days : 0;
+    // receive, ask, urgent/steady, [zero], [numbers], milestones, 7 days, daily, letter, visualization, signs, affirmations
+    const guideCount = 10 + (plan.zero ? 1 : 0) + (m ? 1 : 0);
+    // Numbers the cards "Guide 1", "Guide 2"... in the order they appear (JSX evaluates top to bottom).
+    let guideNo = 0;
+    const G = () => `${t.guideWord} ${++guideNo}`;
 
     const save = () => {
       setGoals((prev) => [
@@ -188,11 +218,14 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
 
     view = (
       <div id="plan-sheet" className="fade-in mt-10 scroll-mt-24 space-y-6">
-        {/* Goal header */}
-        <div className="glass plan-card relative overflow-hidden rounded-3xl p-6 md:p-10">
+        {/* Goal header: the one and only target */}
+        <div className="glass plan-card relative overflow-hidden rounded-3xl border-2 border-gold/50 p-6 md:p-10">
           <div className="pointer-events-none absolute -top-20 -right-20 h-72 w-72 rounded-full bg-violet/30 blur-3xl" />
-          <p className="eyebrow">{t.yourGoal} · {c.label}</p>
+          <p className="text-sm font-bold tracking-wide text-gold">{t.focusOnly} · {c.label}</p>
           <h3 className="font-display mt-3 text-4xl leading-tight md:text-5xl">{plan.goal}</h3>
+          <p className="mt-4 rounded-2xl bg-gold/10 px-4 py-3 text-sm text-gold">
+            {fill(t.focusLine, { n: guideCount })}
+          </p>
           <div className="mt-6 flex flex-wrap gap-3 text-sm">
             <span className="rounded-full bg-gold/15 px-4 py-2 text-gold">
               📅 {fill(t.fromTo, { start: fmtDate(start), end: fmtDate(end) })}
@@ -224,17 +257,17 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
 
         {/* What the universe brings — shown first */}
         <div className="grid gap-6 md:grid-cols-2">
-          <Card title={t.receiveTitle} icon="🎁" className="ring-1 ring-gold/40">
-            <Stars items={[...c.gifts, ...t.common.gifts]} />
+          <Card guide={G()} title={t.receiveTitle} icon="🎁" className="ring-1 ring-gold/40">
+            <Stars items={c.gifts} />
           </Card>
-          <Card title={t.askTitle} icon="🙏" className="ring-1 ring-gold/40">
+          <Card guide={G()} title={t.askTitle} icon="🙏" className="ring-1 ring-gold/40">
             <p className="text-lg leading-relaxed">{c.ask}</p>
           </Card>
         </div>
 
         {/* Urgent vs steady */}
         {plan.urgent ? (
-          <Card title={t.urgency.urgentTitle} icon=""className="ring-1 ring-rose/50">
+          <Card guide={G()} title={t.urgency.urgentTitle} icon=""className="ring-1 ring-rose/50">
             <p className="text-muted">{t.urgency.urgentIntro}</p>
             <ol className="mt-4 space-y-3">
               {[...t.urgency.urgentSteps, ...(plan.money || plan.zero || plan.cat === "money" ? t.urgency.urgentMoney : [])].map((s, i) => (
@@ -246,7 +279,7 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
             </ol>
           </Card>
         ) : (
-          <Card title={t.urgency.steadyTitle} icon=""className="ring-1 ring-cyan/30">
+          <Card guide={G()} title={t.urgency.steadyTitle} icon=""className="ring-1 ring-cyan/30">
             <p className="text-muted">{t.urgency.steadyIntro}</p>
             <Stars items={t.urgency.steadySteps} />
           </Card>
@@ -254,7 +287,7 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
 
         {/* Starting with no job / no money: the honest first milestones */}
         {plan.zero && (
-          <Card title={t.zeroStart.title} icon="🌱" className="ring-1 ring-cyan/40">
+          <Card guide={G()} title={t.zeroStart.title} icon="🌱" className="ring-1 ring-cyan/40">
             <p className="text-muted">{t.zeroStart.intro}</p>
             <ol className="mt-4 space-y-3">
               {t.zeroStart.steps.map((s, i) => (
@@ -270,7 +303,7 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
 
         {/* Numbers */}
         {m && (
-          <Card title={t.numbersTitle} icon="💰">
+          <Card guide={G()} title={t.numbersTitle} icon="💰">
             <p className="text-muted">{fill(t.pace, { amount: formatMoney(m.amount, m.currency, locale) })}</p>
             <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
               {(
@@ -292,7 +325,7 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
         )}
 
         {/* Timeline */}
-        <Card title={t.phasesTitle} icon="🪐">
+        <Card guide={G()} title={t.phasesTitle} icon="🪐">
           <ol className="relative space-y-5 border-l border-white/15 pl-6">
             {phases.map((p, i) => (
               <li key={p.name} className="relative">
@@ -313,7 +346,7 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
         </Card>
 
         {/* First 7 days */}
-        <Card title={t.week1Title} icon="🗓️">
+        <Card guide={G()} title={t.week1Title} icon="🗓️">
           <ol className="grid gap-3 md:grid-cols-2">
             {week.map((w, i) => {
               const d = new Date(start);
@@ -334,17 +367,17 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
           </ol>
         </Card>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card title={t.dailyTitle} icon="☀️"><Stars items={t.daily} /></Card>
-          <Card title={t.weeklyTitle} icon="🔁"><Stars items={t.weekly} /></Card>
-        </div>
+        <Card guide={G()} title={t.dailyTitle} icon="☀️">
+          <p className="mb-3 font-semibold text-gold">🎯 {plan.goal}</p>
+          <Stars items={t.daily} />
+        </Card>
 
-        <Card title={t.letterTitle} icon="💌">
+        <Card guide={G()} title={t.letterTitle} icon="💌">
           <p className="font-display text-xl leading-relaxed whitespace-pre-line">{fill(t.letter, vars)}</p>
         </Card>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <Card title={t.visualTitle} icon="🧘">
+          <Card guide={G()} title={t.visualTitle} icon="🧘">
             <ol className="space-y-3">
               {t.visual.map((v, i) => (
                 <li key={i} className="flex gap-3 text-muted">
@@ -355,10 +388,10 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
             </ol>
           </Card>
           <div className="space-y-6">
-            <Card title={t.signsTitle} icon="✨"><Stars items={[...c.signs, ...t.common.signs]} /></Card>
-            <Card title={t.affirmTitle} icon="💫">
+            <Card guide={G()} title={t.signsTitle} icon="✨"><Stars items={c.signs} /></Card>
+            <Card guide={G()} title={t.affirmTitle} icon="💫">
               <ul className="space-y-2">
-                {[...c.affirmations, ...t.common.affirmations].map((a) => (
+                {c.affirmations.map((a) => (
                   <li key={a} className="font-display text-lg italic">“{a}”</li>
                 ))}
               </ul>
@@ -394,13 +427,39 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
   return (
     <div>
       <form onSubmit={submit} className="glass no-print mx-auto max-w-4xl rounded-3xl p-6 md:p-10">
-        <label htmlFor="p-goal" className="block font-semibold">{t.goalLabel}</label>
-        <textarea
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-5">
+          <span className="text-sm text-gold">🌐 {t.planLang}</span>
+          <LangSwitch current={lang} hash="#planner" />
+        </div>
+        <Step n={1} title={t.goalLabel} htmlFor="p-goal">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-muted">{t.typeIn}</span>
+          {(["si", "en", "ta"] as const).map((k) => (
+            <button
+              type="button"
+              key={k}
+              aria-pressed={typing === k}
+              onClick={() => {
+                setTyping(k);
+                document.getElementById("p-goal")?.focus();
+              }}
+              className={`rounded-full border px-3 py-1 transition ${
+                typing === k ? "border-cyan bg-cyan/15 font-semibold text-cyan" : "border-white/15 text-ink/70 hover:border-cyan"
+              }`}
+            >
+              {k === "si" ? "සිංහල" : k === "en" ? "English" : "தமிழ்"}
+            </button>
+          ))}
+          <span className="text-cyan/80">{t.typeHint[typing]}</span>
+        </div>
+        <TranslitInput
           id="p-goal"
+          multiline
           rows={2}
+          typing={typing}
           className="field mt-3 resize-none text-lg"
           value={goal}
-          onChange={(e) => setGoal(e.target.value)}
+          onChange={setGoal}
           placeholder={t.goalPh}
         />
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
@@ -417,8 +476,11 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
           ))}
         </div>
 
-        <fieldset className="mt-6">
-          <legend className="font-semibold">{t.urgency.label}</legend>
+        </Step>
+
+        <Step n={2} title={t.urgency.label}>
+        <fieldset>
+          <legend className="sr-only">{t.urgency.label}</legend>
           <div className="mt-3 grid grid-cols-2 gap-3">
             {([true, false] as const).map((u) => (
               <button
@@ -438,10 +500,9 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
             ))}
           </div>
         </fieldset>
+        </Step>
 
-        <div className="mt-6 grid gap-6 md:grid-cols-2">
-          <div>
-            <label htmlFor="p-period" className="block font-semibold">{t.periodLabel}</label>
+        <Step n={3} title={t.periodLabel} htmlFor="p-period">
             <div className={`mt-3 flex gap-2 transition ${endDate ? "opacity-40" : ""}`}>
               <input
                 id="p-period"
@@ -479,14 +540,15 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
               onChange={(e) => setEndDate(e.target.value)}
             />
             <p className="mt-2 text-xs text-muted">{t.periodHint}</p>
-          </div>
-          <div>
-            <label htmlFor="p-feel" className="block font-semibold">{t.feelingLabel}</label>
-            <input
+        </Step>
+
+        <Step n={4} title={t.feelingLabel} htmlFor="p-feel">
+            <TranslitInput
               id="p-feel"
+              typing={typing}
               className="field mt-3"
               value={feeling}
-              onChange={(e) => setFeeling(e.target.value)}
+              onChange={setFeeling}
               placeholder={t.feelingPh}
             />
             <p className="mt-4 text-sm text-gold">{t.feelingsLabel}</p>
@@ -509,9 +571,10 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
                 );
               })}
             </div>
-          </div>
-        </div>
-        <button className="btn btn-primary mt-8 w-full justify-center py-4 text-lg">{t.generate}</button>
+        </Step>
+
+        <Step n={5} title={t.generate.replace(/^✦\s*/, "")} last>
+        <button className="btn btn-primary mt-3 w-full justify-center py-4 text-lg">{t.generate}</button>
         {/* Always visible: creates the plan if needed, then downloads the PDF */}
         <div className="mt-4 text-center">
           <button
@@ -531,6 +594,7 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
           </button>
           <p className="mt-2 text-xs text-muted">{pdf === "done" ? t.pdfReady : t.pdfHint}</p>
         </div>
+        </Step>
       </form>
       {view}
     </div>

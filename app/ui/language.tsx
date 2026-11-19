@@ -78,13 +78,13 @@ export function FirstVisitLanguage({ current }: { current: Lang }) {
 }
 
 /** Nav language switcher. */
-export function LangSwitch({ current }: { current: Lang }) {
+export function LangSwitch({ current, hash = "" }: { current: Lang; hash?: string }) {
   return (
     <div className="flex items-center rounded-full border border-white/10 bg-white/5 p-1 text-xs">
       {LANGS.map((l) => (
         <a
           key={l}
-          href={langHref(l)}
+          href={langHref(l) + hash}
           onClick={() => remember(l)}
           lang={l}
           aria-current={l === current ? "page" : undefined}
