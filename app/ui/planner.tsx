@@ -205,11 +205,11 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
           <p className="mt-6 text-muted">{t.statementHint}</p>
           <p className="font-display mt-2 text-2xl text-gold italic">{fill(t.statement, vars)}</p>
           <div className="no-print mt-8 flex flex-wrap gap-3">
-            <button onClick={save} disabled={saved} className="btn btn-primary disabled:opacity-60">
+            <button onClick={save} disabled={saved} className="btn btn-ghost disabled:opacity-60">
               {saved ? "✓" : "⭐"} {t.save}
             </button>
-            <button onClick={makePdf} disabled={pdf === "making"} className="btn btn-ghost disabled:opacity-60">
-              ⬇ {pdfLabel}
+            <button onClick={makePdf} disabled={pdf === "making"} className="btn btn-primary disabled:opacity-60">
+              {pdf === "making" ? "⏳" : "⬇"} {pdf === "done" ? t.pdfPlan : pdfLabel}
             </button>
             <button onClick={() => { setPlan(null); setGoal(""); document.getElementById("planner")?.scrollIntoView({ behavior: "smooth" }); }} className="btn btn-ghost">
               ↺ {t.newPlan}
