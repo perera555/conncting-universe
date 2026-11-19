@@ -448,7 +448,7 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
                 type="number"
                 min={1}
                 inputMode="numeric"
-                className="field w-28 min-w-0"
+                className="field w-24! shrink-0"
                 value={n}
                 onChange={(e) => {
                   setN(e.target.value);
@@ -458,7 +458,7 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
               />
               <select
                 aria-label={t.periodLabel}
-                className="field min-w-0 flex-1 [color-scheme:dark]"
+                className="field min-w-0 flex-1 cursor-pointer [color-scheme:dark]"
                 value={unit}
                 onChange={(e) => {
                   setUnit(e.target.value as Unit);
@@ -512,19 +512,25 @@ export default function Planner({ t, locale }: { t: T; locale: string }) {
           </div>
         </div>
         <button className="btn btn-primary mt-8 w-full justify-center py-4 text-lg">{t.generate}</button>
-        {plan && (
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={makePdf}
-              disabled={pdf === "making"}
-              className="btn btn-ghost w-full justify-center border-gold/60 py-3 disabled:opacity-60"
-            >
-              {pdf === "making" ? "⏳" : "⬇"} {pdf === "done" ? t.pdfPlan : pdfLabel}
-            </button>
-            <p className="mt-2 text-xs text-muted">{pdf === "done" ? t.pdfReady : t.pdfHint}</p>
-          </div>
-        )}
+        {/* Always visible: creates the plan if needed, then downloads the PDF */}
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={() => {
+              if (!goal.trim()) {
+                document.getElementById("p-goal")?.focus();
+                return;
+              }
+              if (plan && plan.goal === goal.trim()) makePdf();
+              else build(goal); // new plan -> PDF downloads automatically
+            }}
+            disabled={pdf === "making"}
+            className="btn btn-ghost w-full justify-center border-gold/60 py-3 text-base disabled:opacity-60"
+          >
+            {pdf === "making" ? "⏳" : "⬇"} {pdf === "making" ? t.pdfMaking : t.pdfPlan}
+          </button>
+          <p className="mt-2 text-xs text-muted">{pdf === "done" ? t.pdfReady : t.pdfHint}</p>
+        </div>
       </form>
       {view}
     </div>
